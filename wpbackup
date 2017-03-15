@@ -1,0 +1,57 @@
+#!/bin/bash
+# 
+# Back up script to back up a standard WordPress installation
+#
+# @author   Alex Adams <alex@jujudigital.com>
+# @version  0.1.0
+# @date     2017-03-15
+# @licence  MIT
+#
+# @example: $bash wpbackup db_name db_user path/to/source/file/root
+#
+
+##
+# Describes correct usage of the script
+#
+usage() {
+  echo 'Usage: wpbackup <db_name> <db_user> <path/to/source/file/root>'
+  exit 1
+}
+
+#
+# Check for parameters
+#
+if [ "$1" = '' ] || [ "$2" = '' ] || [ "$3" = '' ]; then
+  usage
+fi
+
+
+
+db_name=$1
+db_user=$2
+site_path="$3/*"
+
+today=`date +%Y-%m-%d`
+db_file="db-$today.sql"
+site_zip="site-$today.zip"
+
+##
+# Back up the database
+#
+echo "==================================================================="
+echo "Backing up the database"
+echo " "
+
+read -s -p "Enter MySQL Password: " mypw && mysqldump $db_name -u $db_user -p"$mypw" > $db_file
+
+echo " "
+echo "==================================================================="
+echo "Zipping up the site files"
+echo " "
+
+zip -r $site_zip $site_path
+
+echo " "
+echo "==================================================================="
+echo "Back up complete"
+echo " "

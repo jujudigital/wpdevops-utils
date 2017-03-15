@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Installs latest version of WordPress into the target directory
+# given as script argument.
+#
+# @author   Alex Adams <alex@jujudigital.com>
+# @version  1.2.0
+# @date     2016-11-11
+# @licence  MIT
+#
+# @since    version 1.2.0 added target directory validity check
+# @since    version 1.1.0 added wget availability check
+#
+# @example: $bash installwp /full/path/to/target/dir
+#
+# @todo (aadams):  Check target directory is clean and handle if not.
+#                 Maybe use script arg clean_target_folder: bool.
+# @todo (aadams): Make directory if not exist.
+
+##
+# Describes correct usage of the script
+#
+usage() {
+  echo 'Usage: installwp </full/path/to/target/directory>'
+  exit 1
+}
+
+#
+# Check for target directory
+#
+if [ "$1" = '' ]; then
+  usage
+fi
+
+target_dir=$1
+
+#
+# Check target directory exists and switch to it if valid
+#
+if [ ! -d "$target_dir" ]; then
+  echo "Error:  Target directory '$target_dir' does not exist!"
+  exit 1
+else
+  cd $target_dir &>/dev/null
+  echo "==================================================================="
+  echo "Installing latest version of WordPress to the following location:"
+  echo  $target_dir
+  echo " "
+  echo "==================================================================="
+  echo "Downloading the source files"
+fi
+
+#
+# Check if we have wget and use that otherwise use curl
+#
+which wget &>/dev/null
+if [ $? -eq 0 ]; then
+    wget --no-check-certificate https://wordpress.org/latest.tar.gz
+else
+    curl --remote-name https://wordpress.org/latest.tar.gz
+fi
+
+echo " "
+echo "==================================================================="
+echo "Unpacking and installing"
+
+#
+# Unpack, make it so and clean up
+#
+tar -xzvf latest.tar.gz -C ./
+mv wordpress/* ./
+rmdir wordpress
+rm latest.tar.gz
+
+echo " "
+echo "*** Installation complete ***"
+echo "================================"
+exit 0
